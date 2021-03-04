@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+canvas {
+    border:1px solid #d3d3d3;
+    background-color: #f1f1f1;
+}
+</style>
+</head>
+<body>
+    <button onclick="startGame()">Start</button>
+    <div id="score"></div>
+<script>
+
+var gameObject;
+var cars = [];
+var carsL = [];
+var carsD = [];
+var floatObject = [];
+var floatObjectL = [];
+var floatObjectF = [];
+var score;
+
+function startGame() {
+    gameObject = new component(48, 48, "green", 288, 696);
+    myGameArea.start();
+}
+
+var myGameArea = {
+    canvas : document.createElement("canvas"),
+    start : function() {
+        this.canvas.width = 672;
+        this.canvas.height = 745;
+        this.context = this.canvas.getContext("2d");
+        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+        this.frameNo = 0;
+        this.interval = setInterval(updateGameArea, 20);
+        },
+    clear : function() {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    },
+    stop : function() {
+        clearInterval(this.interval);
+    }    
+}
+
+function component(width, height, color, x, y, type) {
+    this.width = width;
+    this.height = height;
+    this.speedX = 0;
+    this.speedY = 0;    
+    this.x = x;
+    this.y = y;    
+    this.update = function() {
+        ctx = myGameArea.context;
+        ctx.fillStyle = color;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+    }
+    this.newPos = function() {
+        this.x += this.speedX;
+        this.y += this.speedY;        
+    }  
+    this.draw = function() {
+        ctx.drawImage(froggerSheet, 3, 3, 48, 48, this.x, this.y, this.width, this.height);
+    }
+    this.drawC = function() {
+        ctx.drawImage(froggerSheet, 3, 350, 48, 48, this.x, this.y, this.width, this.height);
+    }
+    this.drawCL = function() {
+        ctx.drawImage(froggerSheet, 53, 350, 48, 48, this.x, this.y, this.width, this.height);
+    }
+    this.drawD = function() {
+        ctx.drawImage(froggerSheet, 223, 350, 90, 48, this.x, this.y, this.width, this.height);
+    }
+    
+    this.crashWith = function(otherobj) {
+        var myleft = this.x;
+        var myright = this.x + (this.width);
+        var mytop = this.y;
+        var mybottom = this.y + (this.height);
+        var otherleft = otherobj.x;
+        var otherright = otherobj.x + (otherobj.width);
+        var othertop = otherobj.y;
+        var otherbottom = otherobj.y + (otherobj.height);
+        var crash = true;
+        if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
+            crash = false;
+        }
+        return crash;
+    }
+}
+
+function float(width, height, color, x, y, sy){
+    this.width = width;
+    this.height = height;
+    this.speedX = 0;
+    this.speedY = 0;    
+    this.x = x;
+    this.y = y;    
+    this.sy = sy;
+    this.update = function() {
+        ctx = myGameArea.context;
+        ctx.fillStyle = color;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+    }
+    this.newPos = function() {
+        this.x += this.speedX;
+        this.y += this.speedY;        
+    } 
+    this.draw = function() {
+        ctx.drawImage(froggerSheet, 3, 400, 150, 50,  this.x, this.y, this.width, this.height);
+    }
+    this.drawT = function() {
+        ctx.drawImage(froggerSheet, 3, 455, 100, 50, this.x, this.y, this.width, this.height);
+    }
+}
+function updateGameArea() {
+    var x;
+    for (i = 0; i < cars.length; i += 1) {
+        if (gameObject.crashWith(cars[i])) {
+            myGameArea.stop();
+            console.log('Hit');
+            return;
+        }
+    }
+    for (i = 0; i < carsL.length; i += 1) {
+        if (gameObject.crashWith(carsL[i])) {
+            myGameArea.stop();
+            console.log('Hit');
+            return;
+        }
+    }
+    myGameArea.clear();
+    myGameArea.frameNo += 1;
+    if (myGameArea.frameNo == 1 || everyinterval(250)) {
+        x = 0;
+        cars.push(new component(50, 50, "red", -50, 595),
+                  new component(50, 50, "red", -50, 495));
+
+        carsL.push(new component(50, 50, "yellow", 672, 645),
+                   new component(50, 50, "purple", 672, 545));
+        carsD.push(new component(100, 50, "grey", 672, 445));
+
+        floatObject.push(new float(100, 50, "brown", -100, 295),
+                         new float(150, 50, "brown", -150, 145));
+        floatObjectF.push(new float(200, 50, "brown", -200, 245));
+
+        floatObjectL.push(new float(150, 50, "red", 672, 345),
+                          new float(100, 50, "red", 672, 195));
+    }
+    for (i = 0; i < cars.length; i += 1) {
+        cars[i].x += 2;
+        cars[i].update();
+        cars[i].drawC();
+    }
+    for (i = 0; i < carsL.length; i += 1) {
+        carsL[i].x += -1;
+        carsL[i].update();
+        carsL[i].drawCL();
+    }
+    for (i = 0; i < carsD.length; i += 1) {
+        carsD[i].x += -1;
+        carsD[i].update();
+        carsD[i].drawD();
+    }
+    for (i = 0; i < floatObject.length; i += 1){
+        floatObject[i].x += 1;
+        floatObject[i].update();
+        floatObject[i].draw();
+    }
+    for (i = 0; i < floatObjectL.length; i += 1){
+        floatObjectL[i].x += -1;
+        floatObjectL[i].update();
+        floatObjectL[i].drawT();
+    }
+    for (i = 0; i < floatObjectF.length; i += 1){
+        floatObjectF[i].x += 2;
+        floatObjectF[i].update();
+        floatObjectF[i].draw();
+    }
+
+    gameObject.newPos();    
+    gameObject.update();
+    gameObject.draw();
+}
+
+function everyinterval(n) {
+    if ((myGameArea.frameNo / n) % 1 == 0) {return true;}
+    return false;
+}
+
+const froggerSheet = new Image();
+      froggerSheet.onload = () => {
+        window.requestAnimationFrame(updateGameArea);
+      }
+      froggerSheet.src = 'froggerSheet.png';
+
+window.addEventListener('keydown', function(event){
+        switch(event.keyCode) {
+          case 37:
+            console.log('LEFT!');
+            gameObject.x = gameObject.x - 50; 
+            break;
+          case 38:
+            console.log('UP!');
+            gameObject.y = gameObject.y -50;
+            break;
+          case 39:
+            console.log('RIGHT!');
+            gameObject.x = gameObject.x + 50;
+            break;
+          case 40:
+            console.log('DOWN!');
+            gameObject.y = gameObject.y + 50;
+            break;
+      }
+        document.getElementById("score").innerHTML = "SCORE:" + 10;
+    });
+
+
+
+</script>
+
+</body>
+</html>
